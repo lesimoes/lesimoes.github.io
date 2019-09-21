@@ -8,7 +8,7 @@ resume-external: false
 # url: 'https://koppl.in/indigo'
 permalink: '/:title/'
 disqus:
-  shortname: leandro_simoes
+  shortname: lesimoes
   categories:
     - blog
     - project
