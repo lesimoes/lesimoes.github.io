@@ -5,7 +5,7 @@ external-image: false
 picture: assets/images/leprofile.jpg
 resume: false
 resume-external: false
-url: 'https://koppl.in/indigo'
+# url: 'https://koppl.in/indigo'
 permalink: '/:title/'
 disqus:
   shortname: leandro_simoes
