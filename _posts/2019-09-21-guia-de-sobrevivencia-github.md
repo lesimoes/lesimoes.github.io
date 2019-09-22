@@ -6,6 +6,7 @@ image: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyRH1xWERfpkmrEKKy9
 headerImage: true
 tag:
 - dev
+- aula
 category: blog
 author: lesimoes
 description: Um guia rápido, porém necessário, para não sofrer com o github.
@@ -64,3 +65,9 @@ git clone https://github.com/lesimoes/bostinho.git
 <p>O fork cria um clone do projeto diretamente na sua conta do Github, para faze-lo basta ir até o repositório do projeto que Github. Na parte superior existe o botão *'Fork'*, basta clicka-lo e seguir os passos. Em instantes um novo repositório será criado na sua conta.</p>
 
 <p>Após o fork basta seguir os passos 1 ou 2 para baixar o projeto.</p>
+
+
+É isso aí! Recomendo a leitura desse site [Git - Guia Prático](https://rogerdudler.github.io/git-guide/index.pt_BR.html) e principalmente, colocar a mão na massa... Crie repositório, faça push, commit e vá aprendendo na prática.
+
+<br>
+**Tial!**
