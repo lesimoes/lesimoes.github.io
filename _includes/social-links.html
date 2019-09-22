@@ -35,6 +35,12 @@
         </a>
     {% endif %}
 
+    {% if site.lattes %}
+    <a class="link" data-title="http://lattes.cnpq.br/{{ site.lattes }}" href="http://lattes.cnpq.br/{{ site.lattes }}" target="_blank">
+        <svg class="icon icon-lattes"><use xlink:href="#icon-lattes"></use></svg>
+    </a>
+    {% endif %}
+
     {% if site.youtube %}
         <a class="link" data-title="youtube.com/{{ site.youtube }}" href="http://youtube.com/{{ site.youtube }}" target="_blank">
             <svg class="icon icon-youtube"><use xlink:href="#icon-youtube"></use></svg>
@@ -46,6 +52,7 @@
             <svg class="icon icon-spotify"><use xlink:href="#icon-spotify"></use></svg>
         </a>
     {% endif %}
+
 
     {% if site.lastfm %}
         <a class="link" data-title="last.fm/user/{{ site.lastfm }}" href="https://last.fm/user/{{ site.lastfm }}" target="_blank">
