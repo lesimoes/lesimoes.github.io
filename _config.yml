@@ -24,7 +24,7 @@ authors:
     external-image: false
     picture: assets/images/leprofile.jpg
 width: normal
-projects: false
+projects: true
 about: true
 blog: true
 read-time: true
