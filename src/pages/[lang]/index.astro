@@ -1,0 +1,73 @@
+---
+import { getCollection } from "astro:content";
+import BaseHead from "../../components/BaseHead";
+import Footer from "../../components/Footer";
+import Header from "../../components/Header";
+import PostList from "../../components/PostList";
+import { getSiteDescription, getSiteTitle } from "../../consts";
+import {
+  getBlogPath,
+  languages,
+  useTranslations,
+  type Language,
+} from "../../i18n/ui";
+import { getPostLanguage, getPostUrl } from "../../utils/posts";
+
+export function getStaticPaths() {
+  return Object.keys(languages).map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Language;
+const t = useTranslations(lang);
+const siteTitle = getSiteTitle(lang);
+const siteDescription = getSiteDescription(lang);
+const posts = (
+  await getCollection(
+    "blog",
+    (post) => getPostLanguage(post) === lang && !post.data.draft,
+  )
+)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map((post) => ({
+    title: post.data.title,
+    description: post.data.description,
+    pubDate: post.data.pubDate,
+    tags: post.data.tags,
+    href: getPostUrl(post),
+  }));
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <BaseHead
+      title={siteTitle}
+      description={siteDescription}
+      lang={lang}
+      currentUrl={Astro.url.toString()}
+      pathname={Astro.url.pathname}
+      siteUrl={Astro.site?.toString() ?? Astro.url.origin}
+      generator={Astro.generator}
+    />
+  </head>
+  <body>
+    <Header
+      lang={lang}
+      currentPath={Astro.url.pathname}
+      siteTitle={siteTitle}
+    />
+    <main class="home-main">
+      <PostList
+        lang={lang}
+        posts={posts}
+        readMoreLabel={t("post.readMore")}
+        emptyLabel={t("blog.empty")}
+        limit={9}
+      />
+      <p class="all-posts-link">
+        <a href={getBlogPath(lang)}>{t("home.allPosts")}</a>
+      </p>
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

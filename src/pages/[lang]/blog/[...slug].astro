@@ -1,0 +1,16 @@
+---
+import { getCollection } from "astro:content";
+import { getPostPath, type Language } from "../../../i18n/ui";
+import { getCanonicalSlug, getPostLanguage } from "../../../utils/posts";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { lang: getPostLanguage(post), slug: getCanonicalSlug(post) },
+    props: post,
+  }));
+}
+
+const lang = Astro.params.lang as Language;
+return Astro.redirect(getPostPath(lang, Astro.params.slug ?? ""));
+---

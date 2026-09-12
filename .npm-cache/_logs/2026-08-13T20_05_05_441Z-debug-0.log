@@ -1,0 +1,70 @@
+0 verbose cli /Users/leandrosimoes/.nvm/versions/node/v24.18.0/bin/node /Users/leandrosimoes/.nvm/versions/node/v24.18.0/bin/npm
+1 info using npm@11.16.0
+2 info using node@v24.18.0
+3 silly config load:file:/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/leandrosimoes/Work/personal/blog/astro/blog-lesimoes/.npmrc
+5 silly config load:file:/Users/leandrosimoes/.npmrc
+6 silly config load:file:/Users/leandrosimoes/Work/personal/blog/astro/blog-lesimoes/etc/npmrc
+7 verbose title npm install @astrojs/tailwind tailwindcss daisyui
+8 verbose argv "--cache" "blog-lesimoes/.npm-cache" "--prefix" "blog-lesimoes" "install" "@astrojs/tailwind" "tailwindcss" "daisyui"
+9 verbose logfile logs-max:10 dir:/Users/leandrosimoes/Work/personal/blog/astro/blog-lesimoes/.npm-cache/_logs/2026-08-13T20_05_05_441Z-
+10 verbose logfile /Users/leandrosimoes/Work/personal/blog/astro/blog-lesimoes/.npm-cache/_logs/2026-08-13T20_05_05_441Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly idealTree buildDeps
+14 silly fetch manifest @astrojs/tailwind@*
+15 silly packumentCache full:https://registry.npmjs.org/@astrojs%2ftailwind cache-miss
+16 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules
+17 http fetch GET 200 https://registry.npmjs.org/@astrojs%2ftailwind 428ms (cache miss)
+18 silly packumentCache full:https://registry.npmjs.org/@astrojs%2ftailwind set size:undefined disposed:false
+19 silly fetch manifest astro@^7.2.1
+20 silly packumentCache full:https://registry.npmjs.org/astro cache-miss
+21 http fetch GET 200 https://registry.npmjs.org/astro 618ms (cache miss)
+22 silly packumentCache full:https://registry.npmjs.org/astro set size:undefined disposed:false
+23 silly fetch manifest astro@^3.0.0 || ^4.0.0 || ^5.0.0
+24 silly packumentCache full:https://registry.npmjs.org/astro cache-miss
+25 http cache https://registry.npmjs.org/astro 12ms (cache hit)
+26 silly packumentCache full:https://registry.npmjs.org/astro set size:9397692 disposed:false
+27 silly fetch manifest @astrojs/markdown-remark@7.2.2
+28 silly packumentCache full:https://registry.npmjs.org/@astrojs%2fmarkdown-remark cache-miss
+29 http fetch GET 200 https://registry.npmjs.org/@astrojs%2fmarkdown-remark 570ms (cache miss)
+30 silly packumentCache full:https://registry.npmjs.org/@astrojs%2fmarkdown-remark set size:undefined disposed:false
+31 verbose stack Error: unable to resolve dependency tree
+31 verbose stack     at #failPeerConflict (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:1496:25)
+31 verbose stack     at #loadPeerSet (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:1462:33)
+31 verbose stack     at async #buildDepStep (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:978:15)
+31 verbose stack     at async Arborist.buildIdealTree (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:178:7)
+31 verbose stack     at async Promise.all (index 1)
+31 verbose stack     at async Arborist.reify (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:112:5)
+31 verbose stack     at async Install.exec (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/lib/commands/install.js:157:5)
+31 verbose stack     at async Npm.exec (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/lib/npm.js:193:9)
+31 verbose stack     at async module.exports (/Users/leandrosimoes/.nvm/versions/node/v24.18.0/lib/node_modules/npm/lib/cli/entry.js:67:5)
+32 error code ERESOLVE
+33 error ERESOLVE unable to resolve dependency tree
+34 error
+35 error While resolving: blog-lesimoes@0.0.1
+35 error Found: astro@7.2.1[2m[22m
+35 error [2mnode_modules/astro[22m
+35 error   astro@"^7.2.1" from the root project
+35 error
+35 error Could not resolve dependency:
+35 error [95mpeer[39m astro@"^3.0.0 || ^4.0.0 || ^5.0.0" from @astrojs/tailwind@6.0.2[2m[22m
+35 error [2mnode_modules/@astrojs/tailwind[22m
+35 error   @astrojs/tailwind@"*" from the root project
+35 error
+35 error Fix the upstream dependency conflict, or retry this command with --force or --legacy-peer-deps to accept an incorrect (and potentially broken) dependency resolution.
+36 error
+36 error
+36 error For a full report see:
+36 error /Users/leandrosimoes/Work/personal/blog/astro/blog-lesimoes/.npm-cache/_logs/2026-08-13T20_05_05_441Z-eresolve-report.txt
+37 silly unfinished npm timer reify 1786651505806
+38 silly unfinished npm timer reify:loadTrees 1786651505806
+39 silly unfinished npm timer idealTree:buildDeps 1786651505893
+40 silly unfinished npm timer idealTree:#root 1786651505893
+41 verbose cwd /Users/leandrosimoes/Work/personal/blog/astro
+42 verbose os Darwin 25.5.0
+43 verbose node v24.18.0
+44 verbose npm  v11.16.0
+45 verbose exit 1
+46 verbose code 1
+47 error A complete log of this run can be found in: /Users/leandrosimoes/Work/personal/blog/astro/blog-lesimoes/.npm-cache/_logs/2026-08-13T20_05_05_441Z-debug-0.log

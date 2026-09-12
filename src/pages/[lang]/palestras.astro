@@ -1,0 +1,285 @@
+---
+import BaseHead from "../../components/BaseHead";
+import Footer from "../../components/Footer";
+import Header from "../../components/Header";
+import { getSiteDescription, getSiteTitle } from "../../consts";
+import { languages, type Language } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return Object.keys(languages).map((lang) => ({ params: { lang } }));
+}
+
+interface Resource {
+  label: string;
+  href: string;
+}
+
+interface Entry {
+  title: string;
+  source?: string;
+  description?: string;
+  resources?: Resource[];
+}
+
+const lang = Astro.params.lang as Language;
+const siteTitle = getSiteTitle(lang);
+const siteDescription = getSiteDescription(lang);
+
+const labels =
+  lang === "pt"
+    ? {
+        pageTitle: "Palestras",
+        publications: "Publicações",
+        source: "Fonte",
+        publication: "Publicação",
+        article: "Artigo",
+        thesisDescription:
+          "Apliquei minha pesquisa sobre sistemas de recomendação em diversos domínios. Fui responsável pela implementação do mecanismo de recomendação de um projeto da FAPEMIG que desenvolveu um aplicativo para as Olimpíadas Rio 2016. O sistema utiliza aprendizado de máquina para recomendar atrações turísticas e eventos esportivos aos usuários.",
+      }
+    : {
+        pageTitle: "Talks",
+        publications: "Publications",
+        source: "Source",
+        publication: "Publication",
+        article: "Article",
+        thesisDescription:
+          "I applied my research on recommendation systems in several domains. I was responsible for implementing the recommendation engine for a FAPEMIG project that developed an app for the Rio 2016 Olympics. The system uses machine learning to recommend tourist attractions and sporting events to users.",
+      };
+
+const talks: Entry[] = [
+  {
+    title: "React — Resolvendo os erros mais comuns de quem está começando",
+    source: "Tech Hub Conf — 2024",
+    resources: [
+      {
+        label: "Slides",
+        href: "https://docs.google.com/presentation/d/1rw1AxsK_3Qbir6ArWV8fCw-1aN09pBlone629vQCZ-A/edit?usp=sharing",
+      },
+    ],
+  },
+  {
+    title: "Mini-curso Firebase + JavaScript",
+    source: "Semana da Computação UFJF — 2021",
+    resources: [
+      {
+        label: "YouTube",
+        href: "https://www.youtube.com/watch?v=E5o2ssQ10EM",
+      },
+    ],
+  },
+  {
+    title: "Chatbots? O que são? Onde vivem?",
+    source: "Universidade Estácio de Sá Juiz de Fora — 2019",
+    resources: [
+      {
+        label: "Slides",
+        href: "https://docs.google.com/presentation/d/1_W3xYWSEhJ_7qYRqdHKUP6LEyZb0TkYjvtb6DfqHxT0/edit?slide=id.p#slide=id.p",
+      },
+    ],
+  },
+];
+
+const publications: Entry[] = [
+  {
+    title:
+      "Thesis: MMRecommender: Arquitetura Aberta para Sistemas de Recomendação (PT-BR)",
+    description: labels.thesisDescription,
+  },
+  {
+    title: "R.ECOS: educational recommender ecosystem (co-author)",
+    source:
+      lang === "pt"
+        ? "5th International Workshop on Software Engineering for Systems-of-Systems — 1 de junho de 2017"
+        : "5th International Workshop on Software Engineering for Systems-of-Systems — June 1, 2017",
+  },
+  {
+    title:
+      "Sistema de Recomendação de Serviços Baseado em uma Arquitetura Aberta para um Ecossistema de Software",
+    source:
+      lang === "pt"
+        ? "Simpósio Brasileiro em Sistemas de Informação (SBSI) — 1 de junho de 2017"
+        : "Brazilian Symposium on Information Systems (SBSI) — June 1, 2017",
+  },
+  {
+    title:
+      "MMRecommender: Metamodelo de Sistemas de Recomendação Aplicado a Grupos Educacionais",
+    source:
+      lang === "pt"
+        ? "TISE 2016 — 1 de novembro de 2016"
+        : "TISE 2016 — November 1, 2016",
+    resources: [
+      {
+        label: labels.publication,
+        href: "https://www.researchgate.net/publication/311510492_MMRecommender_Metamodelo_de_Sistemas_de_Recomendacao_Aplicado_a_Grupos_Educacionais",
+      },
+      {
+        label: "Slides",
+        href: "https://docs.google.com/presentation/d/1q0rNRe5lbN5-I1knJ5hJ52DrJhVfzY224h3_7yFv3Bo/edit?usp=sharing",
+      },
+    ],
+  },
+  {
+    title: "Testes funcionais com a ferramenta QF-Test",
+    source:
+      lang === "pt"
+        ? "Revista Engenharia de Software Magazine — edição 83 · janeiro de 2016"
+        : "Engenharia de Software Magazine — issue 83 · January 2016",
+    resources: [
+      {
+        label: labels.article,
+        href: "https://www.devmedia.com.br/revista-engenharia-de-software-magazine-83/34199",
+      },
+    ],
+  },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <BaseHead
+      title={`${labels.pageTitle} | ${siteTitle}`}
+      description={siteDescription}
+      lang={lang}
+      currentUrl={Astro.url.toString()}
+      pathname={Astro.url.pathname}
+      siteUrl={Astro.site?.toString() ?? Astro.url.origin}
+      generator={Astro.generator}
+    />
+  </head>
+  <body>
+    <Header
+      lang={lang}
+      currentPath={Astro.url.pathname}
+      siteTitle={siteTitle}
+    />
+    <main class="talks-main">
+      <h1>{labels.pageTitle}</h1>
+      <ul class="entry-list">
+        {talks.map((talk) => (
+          <li class="entry">
+            <h2>{talk.title}</h2>
+            {talk.source && (
+              <p class="source">
+                <strong>{labels.source}:</strong> {talk.source}
+              </p>
+            )}
+            {talk.resources && (
+              <nav
+                class="resource-links"
+                aria-label={`${talk.title} resources`}
+              >
+                {talk.resources.map((resource) => (
+                  <a href={resource.href} target="_blank" rel="noreferrer">
+                    {resource.label}
+                  </a>
+                ))}
+              </nav>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <section class="content-section" aria-labelledby="publications-title">
+        <h2 id="publications-title" class="section-title">
+          {labels.publications}
+        </h2>
+        <ul class="entry-list">
+          {publications.map((publication) => (
+            <li class="entry">
+              <h3>{publication.title}</h3>
+              {publication.description && (
+                <p class="description">{publication.description}</p>
+              )}
+              {publication.source && (
+                <p class="source">
+                  <strong>{labels.source}:</strong> {publication.source}
+                </p>
+              )}
+              {publication.resources && (
+                <nav
+                  class="resource-links"
+                  aria-label={`${publication.title} resources`}
+                >
+                  {publication.resources.map((resource) => (
+                    <a href={resource.href} target="_blank" rel="noreferrer">
+                      {resource.label}
+                    </a>
+                  ))}
+                </nav>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>
+
+<style>
+  .talks-main {
+    padding-top: 42px;
+  }
+
+  .talks-main > h1 {
+    margin-bottom: 32px;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+  }
+
+  .content-section {
+    margin-top: 48px;
+  }
+
+  .section-title {
+    margin-bottom: 12px;
+    font-size: 1.8rem;
+    letter-spacing: -0.03em;
+  }
+
+  .entry-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .entry {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .entry h2,
+  .entry h3 {
+    max-width: 820px;
+    margin-bottom: 8px;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .source,
+  .description {
+    max-width: 820px;
+    margin-bottom: 10px;
+    color: var(--muted);
+  }
+
+  .description {
+    line-height: 1.7;
+  }
+
+  .resource-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .resource-links a {
+    color: var(--secondary);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>
