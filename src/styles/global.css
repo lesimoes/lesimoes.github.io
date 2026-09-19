@@ -292,12 +292,44 @@ ul {
 	margin-bottom: 1.2rem;
 }
 
-.prose h2,
-.prose h3,
-.prose h4 {
-	margin: 2rem 0 0.75rem;
+.prose > h1,
+.prose > h2,
+.prose > h3,
+.prose > h4,
+.prose > h5,
+.prose > h6 {
+	margin: 2.5rem 0 0.85rem;
 	color: var(--text);
-	letter-spacing: -0.02em;
+	font-weight: 750;
+	letter-spacing: -0.025em;
+	line-height: 1.2;
+}
+
+.prose > h1 {
+	font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.prose > h2 {
+	font-size: clamp(1.65rem, 3vw, 2.1rem);
+}
+
+.prose > h3 {
+	font-size: clamp(1.35rem, 2.5vw, 1.65rem);
+}
+
+.prose > h4 {
+	font-size: 1.2rem;
+}
+
+.prose > h5 {
+	font-size: 1.05rem;
+}
+
+.prose > h6 {
+	color: var(--muted);
+	font-size: 0.95rem;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
 }
 
 .prose a {
