@@ -6,7 +6,7 @@ draft: false
 tags: ['javascript', 'garbage-collection']
 summary: 'Entendendo como funciona o Garbage Collection no Javascript/Node.'
 ---
-###### Introdução
+# Introdução
 
 De forma geral, o Garbage collector funciona dessa forma:
 1. Identifica objetos "vivos" e "mortos".
@@ -24,7 +24,7 @@ console.log(window.novo) //{a: 1, b: 2}
 Obs.: O caso do *let* e *const* é diferente, por isso existem outras formas de o GC identificar raízes; para esse artigo, vamos considerar o caso do *var*, que é vinculado ao objeto global *window*.
 
 
-###### O custo do GC
+# O custo do GC
 
 Executar o GC vem com um custo: ele consome recursos e, consequentemente, pode aumentar o tempo de processamento. Essa estratégia é chamada de "stop-the-world"; apesar de simples, essa estratégia precisa usar os recursos da main-thread, ou seja, pode causar o aumento de latência.
 
@@ -42,7 +42,7 @@ Atualmente, o V8 suporta outras estratégias de execução do GC, sendo elas:
 
 ![Estratégias paralela, incremental e concorrente do garbage collector](../../../assets/images/gc/gc_06.png)
 
-###### Generation Layout
+# Generation Layout
 
 O V8 divide a heap em duas áreas chamadas generations (gerações), sendo elas a *Young generation* e a *Old generation*. A *Young generation* tem mais duas divisões, *Nursery* e *Intermediate*.
 
@@ -50,7 +50,7 @@ A ideia aqui é que é mais comum criarmos objetos que devem ser destruídos log
 
 ![Organização da Young generation e da Old generation](../../../assets/images/gc/gc_01.png)
 
-###### Major GC (Full Mark-Compact)
+## Major GC (Full Mark-Compact)
 
 Considere esse trecho de código:
 
@@ -84,7 +84,7 @@ console.log(window.d) //undefined - dead object
 
 O *Major GC* começa de forma *concorrente* no processo de *Marking*; quando termina, envia o resultado para a main-thread, que valida o *Marking* e inicia o *Compact* de forma paralela onde for possível; então, a main-thread começa o *Sweep* de forma *concorrente*.
 
-###### Minor GC (Scavenger)
+## Minor GC (Scavenger)
 
 Existem dois tipos de GC no V8: o *Major* é aplicado em toda a heap (*Young* e *Old*), enquanto o *Minor* é aplicado apenas na *Young*.
 
@@ -93,7 +93,7 @@ Esse GC é responsável por mover objetos entre as duas divisões da *Young gene
 O *Minor GC* usa a estratégia *paralela*, dividindo a carga de trabalho entre a main-thread e as helper threads.
 
 
-###### Analisando o trace do GC na prática
+# Analisando o trace do GC na prática
 
 Execute esse código usando a flag *--trace-gc*:
 ```javascript
@@ -191,7 +191,7 @@ main();
 ```
 
 
-###### Conclusão
+# Conclusão
 
 Após entender como funciona o GC no Node, podemos ler o trace do GC e procurar por vazamentos de memória. Em alguns casos, manipular o tamanho de cada generation (espaço) pode resolver o problema. Por exemplo, você pode testar a execução do mesmo código com essa flag, que altera o limite da *Young* (referenciado como semi-space).
 
