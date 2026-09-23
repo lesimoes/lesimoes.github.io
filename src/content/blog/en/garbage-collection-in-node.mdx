@@ -71,11 +71,11 @@ There are two types of GC in V8: *Major* is applied to the entire heap (*Young* 
 
 **Sweeping:** The space occupied by objects that cannot be reached is added to a structure called a *free-list*. This structure organizes the memory addresses and sizes of the freed regions. When more memory is needed, the *free-list* is consulted to retrieve a free region of the required size.
 
-![Removing dead objects and registering free space in the free-list](../../../assets/images/gc/gc_03.png)
+![Compacting live objects and grouping free space](../../../assets/images/gc/gc_04.png)
 
 **Compaction:** This is the process of compacting (and evacuating—moving) used memory by moving live objects into contiguous regions. This reduces fragmentation and groups free space together, allowing it to be reused for future allocations. Free regions can be registered in the *free-list* and made available to the allocator.
 
-![Compacting live objects and grouping free space](../../../assets/images/gc/gc_04.png)
+![Removing dead objects and registering free space in the free-list](../../../assets/images/gc/gc_03.png)
 
 The *Major GC* begins the *Marking* process concurrently. When it finishes, it sends the result to the main thread, which validates the *Marking* and starts *Compaction* in parallel where possible. The main thread then starts *Sweeping* concurrently.
 
