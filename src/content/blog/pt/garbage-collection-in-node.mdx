@@ -1,32 +1,44 @@
 ---
-title: 'Garbage Collection no JavaScript'
+title: 'Como funciona o Garbage Collection no Node.js'
 date: '2026-09-19'
-lastmod: '2026-09-19'
+lastmod: '2026-09-22'
 draft: false
-tags: ['javascript', 'garbage-collection']
-summary: 'Entendendo como funciona o Garbage Collection no Javascript/Node.'
+tags: ['node.js','v8', 'garbage-collection']
+summary: 'Entendendo como funciona o Garbage Collection no Node.js.'
 ---
 # Introdução
 
-De forma geral, o Garbage collector funciona dessa forma:
+Esse artigo um estudo sobre o Garbage Collection no V8, e consequentemente no Node.js, ele não tem a intenção de apresentar algo prático com aplicações diretas no dia a dia, apesar de apresentar código e exemplos a intenção aqui é aprofundar o conhecimento sobre Node.js e como ele funciona.
+
+
+De forma geral, todo Garbage collector funciona dessa forma:
 1. Identifica objetos "vivos" e "mortos".
 2. Recicla/reutiliza a memória ocupada por objetos mortos.
 3. Compacta/desfragmenta a memória (opcional).
 
-A definição de objetos vivos e mortos depende do "alcance": em JavaScript, um objeto está vivo se pode ser alcançado a partir da raiz. Esse é um exemplo simples:
+A definição de objetos vivos e mortos depende do "alcance": em JavaScript, um objeto está vivo se pode ser alcançado a partir da raiz. Um objeto morto não pode ser alcançado.
 
 ```javascript
-var novo = {a: 1, b: 2}
 
-console.log(window.novo) //{a: 1, b: 2}
+var a = {b: 1, c: 2}
+var d = {e: 1}
+
+console.log(window.a) //{b: 1, c: 2} - live object
+console.log(window.d) //{e: 1} - live object
+console.log(window.a.b) //1 - also live object
+
+d = undefined
+
+console.log(window.a) //{b: 1, c: 2} - live object
+console.log(window.d) //undefined - dead object
 ```
 
-Obs.: O caso do *let* e *const* é diferente, por isso existem outras formas de o GC identificar raízes; para esse artigo, vamos considerar o caso do *var*, que é vinculado ao objeto global *window*.
+Obs.: O caso do *let* e *const* é diferente, por isso existem outras formas de o GC identificar raízes. Para esse artigo, vamos considerar o caso do *var*, que é vinculado ao objeto global *window*.
 
 
 # O custo do GC
 
-Executar o GC vem com um custo: ele consome recursos e, consequentemente, pode aumentar o tempo de processamento. Essa estratégia é chamada de "stop-the-world"; apesar de simples, essa estratégia precisa usar os recursos da main-thread, ou seja, pode causar o aumento de latência.
+Executar o GC vem com um custo: ele consome recursos e, consequentemente, pode aumentar o tempo de processamento. Essa estratégia é chamada de "stop-the-world", apesar de simples, essa estratégia precisa usar os recursos da main-thread, ou seja, pode causar o aumento de latência.
 
 Atualmente, o V8 suporta outras estratégias de execução do GC, sendo elas:
 
@@ -36,7 +48,7 @@ Atualmente, o V8 suporta outras estratégias de execução do GC, sendo elas:
 
 **Concorrente:** É quando o código JS é executado na main-thread enquanto o GC é executado em helper threads. À primeira vista, pode parecer a melhor estratégia, porém ela vem com um custo: é a mais complicada porque sofre do mesmo problema da Incremental, porém agora com código JS sendo executado de forma concorrente, ou seja, com operações que podem gerar race conditions.
 
-**Atenção:** A descrição usada pode parecer com a definição de execução paralela, porém, no contexto do GC, como as helper threads estão manipulando o mesmo espaço de memória (heap), entende-se que elas estão concorrendo entre si pelo mesmo recurso; por isso, é concorrência.
+**Atenção:** A descrição usada pode parecer com a definição de execução paralela, porém, no contexto do GC, como as helper threads estão manipulando o mesmo espaço de memória (heap), entende-se que elas estão concorrendo entre si pelo mesmo recurso, por isso, é concorrência.
 
 ![Pausa stop-the-world para execução do garbage collector](../../../assets/images/gc/gc_05.png)
 
@@ -44,31 +56,15 @@ Atualmente, o V8 suporta outras estratégias de execução do GC, sendo elas:
 
 # Generation Layout
 
-O V8 divide a heap em duas áreas chamadas generations (gerações), sendo elas a *Young generation* e a *Old generation*. A *Young generation* tem mais duas divisões, *Nursery* e *Intermediate*.
+O V8 divide a heap em duas áreas chamadas generations (gerações), sendo elas a *Young generation* e a *Old generation*. A *Young generation* tem mais duas divisões, *"Nursery"* e *"Intermediate"*. São nomes conceituais, na seção sobre o Minor aprenseto os nomes corretos. 
 
-A ideia aqui é que é mais comum criarmos objetos que devem ser destruídos logo na sequência, ou que esse tipo de comportamento é o mais esperado. Por isso, todo objeto nasce na *Young generation*, em *Nursery*; após a primeira rodada do GC, se ele sobreviveu, vai para *Intermediate*; e, após mais uma rodada, se o objeto ainda estiver vivo, vai para *Old generation*. Lembre-se de que estar vivo significa ser acessível através da raiz; no exemplo, ser acessível a partir do objeto global *window*.
+A ideia aqui é que é mais comum criarmos objetos que devem ser destruídos logo na sequência, ou que esse tipo de comportamento é o mais esperado. Por isso, todo objeto nasce na *Young generation*, em *Nursery*. Após a primeira rodada do GC, se ele sobreviveu, vai para *Intermediate*, e, após mais uma rodada, se o objeto ainda estiver vivo, vai para *Old generation*. Lembre-se de que estar vivo significa ser acessível através da raiz, no exemplo, ser acessível a partir do objeto global *window*.
+
+Existem dois tipos de GC no V8: o *Major* é aplicado em toda a heap (*Young* e *Old*), enquanto o *Minor* é aplicado apenas na *Young*.
 
 ![Organização da Young generation e da Old generation](../../../assets/images/gc/gc_01.png)
 
 ## Major GC (Full Mark-Compact)
-
-Considere esse trecho de código:
-
-```javascript
-
-var a = {b: 1, c: 2}
-var d = {e: 1}
-
-console.log(window.a) //{b: 1, c: 2} - live object
-console.log(window.d) //{e: 1} - live object
-
-d = undefined
-
-console.log(window.a) //{b: 1, c: 2} - live object
-console.log(window.d) //undefined - dead object
-
-
-```
 
 **Marking:** É o processo de acessar os objetos acessíveis e marcá-los. O GC segue os ponteiros e acessa e marca os objetos em tempo de execução de forma recursiva, similar a percorrer uma árvore, até acessar todos os objetos.
 
@@ -82,13 +78,11 @@ console.log(window.d) //undefined - dead object
 
 ![Compactação dos objetos vivos e agrupamento do espaço livre](../../../assets/images/gc/gc_04.png)
 
-O *Major GC* começa de forma *concorrente* no processo de *Marking*; quando termina, envia o resultado para a main-thread, que valida o *Marking* e inicia o *Compact* de forma paralela onde for possível; então, a main-thread começa o *Sweep* de forma *concorrente*.
+O *Major GC* começa de forma *concorrente* no processo de *Marking*. Quando termina, envia o resultado para a main-thread, que valida o *Marking* e inicia o *Compact* de forma paralela onde for possível. Então, a main-thread começa o *Sweep* de forma *concorrente*.
 
 ## Minor GC (Scavenger)
 
-Existem dois tipos de GC no V8: o *Major* é aplicado em toda a heap (*Young* e *Old*), enquanto o *Minor* é aplicado apenas na *Young*.
-
-Esse GC é responsável por mover objetos entre as duas divisões da *Young generation*. Como a *Young generation* é menor, ~16 MB, o Minor GC é executado com mais frequência.
+Esse GC é responsável por mover objetos entre as duas divisões da *Young generation*, dividida em dois *semi-spaces*, **From-Space** e **To-Space**. Como a *Young generation* é menor, ~16 MB, o Minor GC é executado com mais frequência.
 
 O *Minor GC* usa a estratégia *paralela*, dividindo a carga de trabalho entre a main-thread e as helper threads.
 
@@ -124,8 +118,8 @@ A saída será algo assim:
 Vamos entender as partes mais importantes dessa saída:
 
 [55384:0x70480c000] -> [PID: instância da heap JS].
-19 ms -> Quando a etapa começou; aqui, significa que começou após 19 ms de execução.
-Scavenge -> Fase de execução; nesse caso, Scavenge é Minor GC.
+19 ms -> Quando a etapa começou. Aqui, significa que começou após 19 ms de execução.
+Scavenge -> Fase de execução. Nesse caso, Scavenge é Minor GC.
 4.4 (5.5) -> Heap usada antes do GC (total da heap antes do GC), ambos em MB.
 4.2 (6.5) -> Heap depois do GC (total da heap depois do GC), novamente em MB.
 0.79 / ** ms -> Tempo que o JS ficou parado.
@@ -168,7 +162,7 @@ Ou seja, os objetos estão sendo promovidos para a *Old generation*, e o Node.js
 
 Em bom português, aqui a vaca foi pro brejo: a quantidade de memória alocada chegou a 315.8 MB, e o Major GC foi acionado.
 
-Agora execute essa versão do código. A diferença aqui é que os objetos são criados e, como não são adicionados ao Set, perdem sua referência; logo, não vão para a *Old generation*. O trace irá mostrar apenas a execução do Minor GC.
+Agora execute essa versão do código. A diferença aqui é que os objetos são criados e, como não são adicionados ao Set, perdem sua referência. Logo, não vão para a *Old generation*. O trace irá mostrar apenas a execução do Minor GC.
 
 ```javascript
 let maximum = 1_000_000;
@@ -186,30 +180,64 @@ const main = () => {
   }
 }
 main();
+```
+
+# Sinas de vazamento de memória (o que procurar nos logs?)
+
+### 1. O uso de memória aumenta depois do Major GC. 
+
+O esperado é que após o Major GC a Old generation fique menor ou se mantenha estável, isso significa que o Major GC está liberando a memória enquantos objetos de Young são introduzidos.
+
+Retorno esperado - Major GC funcionando, memória se mantém ~30MB.
+
+```plaintext
+[PID] 1000 ms: Mark-Compact 150.2 (200.0) -> 30.5 (200.0) MB ...
+[PID] 5000 ms: Mark-Compact 180.1 (200.0) -> 31.0 (200.0) MB ...
+[PID] 9000 ms: Mark-Compact 175.4 (200.0) -> 29.8 (200.0) MB ...
+```
+
+Retorno ruim
+```plaintext
+[PID] 1000 ms: Mark-Compact 150.2 (200.0) -> 80.5 (200.0) MB ...
+[PID] 3000 ms: Mark-Compact 190.1 (250.0) -> 120.2 (250.0) MB ...
+[PID] 5000 ms: Mark-Compact 240.8 (300.0) -> 180.0 (300.0) MB ...
+[PID] 7000 ms: Mark-Compact 290.0 (350.0) -> 250.4 (350.0) MB ...
+```
+
+### 2. Minor parece não funcionar.
+
+Quando muitos objetos vão da Young para Old pode ser o indício de um problema dado que poderá sobrecarregar a Old. Nos logs você verá que a memória usada antes e depois do Minor GC (Scavenge) não diminui, mesmo após sucessivas execuções do Minor.
 
 
+```plaintext
+[PID] 100 ms: Scavenge 12.4 (16.0) -> 12.2 (16.0) MB
+[PID] 120 ms: Scavenge 14.5 (16.0) -> 14.4 (20.0) MB
+```
+
+### 3. Major GC sendo executado com maior frequência.
+
+Quando a Old fica sem espaço o Major GC precisa limpa-la. Como já sabemos o esperado é que boa parte dos objetos não sejam promividos da Young para a Old, e se a Old fica constantemente cheia você irá notar o Major GC sendo executado com mais frequência e num menor espaço de tempo entre as execuções.
+
+Nos logs você verá algo assim:
+
+```plaintext
+[PID] 10000 ms: Mark-Compact
+[PID] 12000 ms: Mark-Compact
+[PID] 13000 ms: Mark-Compact
+[PID] 13500 ms: Mark-Compact
 ```
 
 
 # Conclusão
 
-Após entender como funciona o GC no Node, podemos ler o trace do GC e procurar por vazamentos de memória. Em alguns casos, manipular o tamanho de cada generation (espaço) pode resolver o problema. Por exemplo, você pode testar a execução do mesmo código com essa flag, que altera o limite da *Young* (referenciado como semi-space).
-
-```bash
-node --trace-gc --max-semi-space-size=900 gc.js
-```
-
-O resultado esperado é coletas menores do Minor GC e menos execuções do Major GC, dado que agora temos mais espaço total na *Young*.
-
-Em cenários reais, será mais difícil identificar vazamentos de memória, e outras técnicas para analisar a aplicação podem e devem ser usadas; porém, entender o funcionamento do GC e saber como ler o seu trace é parte fundamental para descobrir problemas.
-
-Obs.: Alguns detalhes da *Young* como semi-spaces e writer barriers, foram deixados de fora do artigo para simplifca-lo.
+Após entender como funciona o GC no Node, podemos ler o trace do GC e identificar se há vazamento de memória, porém não conseguimos identificar onde ele ocorre, para isso devemos usar outras ferramentas. Em breve escrevei um artigo sobre como identificar esses vazamentos.
 
 
+<br /><br /><br />
 **Uso de IA**:
 - Correção gramatical.
 
-**Fontes**:
-https://nodejs.org/learn/diagnostics/memory/using-gc-traces
-https://v8.dev/blog/trash-talk
+**Fontes**:<br />
+https://nodejs.org/learn/diagnostics/memory/using-gc-traces<br />
+https://v8.dev/blog/trash-talk<br />
 https://nodejs.org/api/cli.html
